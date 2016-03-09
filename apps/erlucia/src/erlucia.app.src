@@ -1,0 +1,21 @@
+{application, erlucia,
+ [{description, "An OTP application"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, { erlucia_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    lager,
+    hackney,
+    amqp_client, 
+    jsx, 
+    iso8601
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, []},
+  {links, []}
+ ]}.
