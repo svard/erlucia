@@ -42,6 +42,9 @@ handle_info(_Info, State, Data) ->
     {next_state, State, Data}.
 
 terminate(normal, _State, _Data) ->
+    ok;
+terminate(Reason, _State, _Data) ->
+    lager:error("FSM terminated with reason ~p", [Reason]),
     ok.
 
 code_change(_Old_version, State, Data, _Extra) ->
