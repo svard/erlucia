@@ -1,6 +1,10 @@
 -module(erlucia_controller).
 
--export([check/1]).
+-export([handle_payload/1]).
+
+handle_payload(Payload) ->
+    Json = jsx:decode(Payload, [return_maps]),
+    check(Json).
 
 check(#{<<"date">> := Date, <<"level">> := Level}) when Level < 0.1 ->
     Datetime = iso8601:parse(Date),

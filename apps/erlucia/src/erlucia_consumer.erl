@@ -11,7 +11,7 @@
 
 start_link() ->
     lager:info("Starting consumer"),
-    {ok, Host} = application:get_env(rabbit_host),
+    Host = erlucia_app:get_env(rabbit_host),
     Queuename = queue_name("erlucia"),
     {ok, Connection} = amqp_connection:start(#amqp_params_network{host = Host}),
     {ok, Channel} = amqp_connection:open_channel(Connection),
@@ -39,8 +39,7 @@ loop() ->
             ok;
 
         {#'basic.deliver'{delivery_tag = _Tag}, #amqp_msg{payload = Payload}} ->
-            Json = jsx:decode(Payload, [return_maps]),
-            spawn(erlucia_controller, check, [Json]),
+            spawn(erlucia_controller, handle_payload, [Payload]),
             loop()
     end.
 

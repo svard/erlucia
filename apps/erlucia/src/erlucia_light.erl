@@ -11,7 +11,7 @@ switch_off(Id) ->
     send(Id, Body).
 
 send(Id, Body) ->
-    {ok, Url} = application:get_env(light_api_url),
+    Url = erlucia_app:get_env(light_api_url),
     Path = Url ++ integer_to_list(Id),
     Headers = [{<<"Content-Type">>, <<"application/json">>}],
 
@@ -20,5 +20,5 @@ send(Id, Body) ->
             lager:info("Light switch successful, id ~p", [Id]);
         
         Resp ->
-            lager:error("Failed to switch light ~p", [Resp])
+            lager:error("Request to ~p failed with ~p", [Url, Resp])
     end.
