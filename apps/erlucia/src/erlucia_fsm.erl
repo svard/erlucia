@@ -12,7 +12,7 @@
 
 start_link() ->
     lager:info("Starting FSM"),
-    gen_fsm:start_link({global, ?MODULE}, ?MODULE, [], []).
+    gen_fsm:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
     {ok, check_one, #{triggered => false}}.
@@ -52,10 +52,10 @@ code_change(_Old_version, State, Data, _Extra) ->
 
 %% API
 next() ->
-    gen_fsm:send_event({global, ?MODULE}, next).
+    gen_fsm:send_event(?MODULE, next).
 
 reset() ->
-    gen_fsm:send_all_state_event({global, ?MODULE}, reset).
+    gen_fsm:send_all_state_event(?MODULE, reset).
 
 get() ->
-    gen_fsm:sync_send_all_state_event({global, ?MODULE}, get).
+    gen_fsm:sync_send_all_state_event(?MODULE, get).
