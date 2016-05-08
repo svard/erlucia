@@ -29,8 +29,8 @@ start_link() ->
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
     Children = [{erlucia_consumer, {erlucia_consumer, start_link, []}, transient, 2000, worker, [erlucia_consumer]},
-                {erlucia_fsm, {erlucia_fsm, start_link, []}, permanent, 2000, worker, [erlucia_fsm]}],
-    {ok, { {one_for_one, 0, 1}, Children} }.
+                {erlucia_fsm, {erlucia_fsm, start_link, []}, permanent, brutal_kill, worker, [erlucia_fsm]}],
+    {ok, { {one_for_one, 1, 1}, Children} }.
 
 %%====================================================================
 %% Internal functions

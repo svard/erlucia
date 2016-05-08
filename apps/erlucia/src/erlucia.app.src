@@ -1,6 +1,6 @@
 {application, erlucia,
  [{description, "An OTP application"},
-  {vsn, "0.1.0"},
+  {vsn, "1.1.4"},
   {registered, []},
   {mod, { erlucia_app, []}},
   {applications,
