@@ -30,7 +30,7 @@ start_link() ->
 init([]) ->
     Children = [{erlucia_consumer, {erlucia_consumer, start_link, []}, transient, 2000, worker, [erlucia_consumer]},
                 {erlucia_fsm, {erlucia_fsm, start_link, []}, permanent, brutal_kill, worker, [erlucia_fsm]}],
-    {ok, { {one_for_one, 1, 1}, Children} }.
+    {ok, { {rest_for_one, 1, 1}, Children} }.
 
 %%====================================================================
 %% Internal functions

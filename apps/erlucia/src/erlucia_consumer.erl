@@ -39,7 +39,7 @@ loop() ->
             ok;
 
         {#'basic.deliver'{delivery_tag = _Tag}, #amqp_msg{payload = Payload}} ->
-            spawn(erlucia_controller, handle_payload, [Payload]),
+            spawn_link(erlucia_controller, handle_payload, [Payload]),
             loop()
     end.
 
