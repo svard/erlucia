@@ -1,16 +1,28 @@
 -module(erlucia_consumer).
 
+-behaviour(gen_server).
+
 -include_lib("amqp_client/include/amqp_client.hrl").
 
 -export([start_link/0]).
-
--export([loop/0]).
+%% Callbacks
+-export([init/1, handle_info/2, terminate/2]).
 
 -define(ROUTING_KEY, <<"light-level">>).
 -define(EXCHANGE, <<"automation">>).
 
+-record(state, {connection, channel}).
+
 start_link() ->
     lager:info("Starting consumer"),
+    gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+
+init([]) ->
+    self() ! connect_amqp,
+    {ok, undefined}.
+
+handle_info(connect_amqp, _State) ->
+    lager:info("Connecting to message bus"),
     Host = erlucia_app:get_env(rabbit_host),
     Queuename = queue_name("erlucia"),
     {ok, Connection} = amqp_connection:start(#amqp_params_network{host = Host}),
@@ -25,24 +37,34 @@ start_link() ->
                                                                   queue = Queuename,
                                                                   routing_key = ?ROUTING_KEY}),
 
-    Pid = spawn_link(?MODULE, loop, []),
     Sub = #'basic.consume'{queue = Queuename, no_ack = true},
-    amqp_channel:subscribe(Channel, Sub, Pid),
-    {ok, Pid}.
-
-loop() ->
-    receive
-        #'basic.consume_ok'{} ->
-            loop();
-        
-        #'basic.cancel_ok'{} ->
-            ok;
-
-        {#'basic.deliver'{delivery_tag = _Tag}, #amqp_msg{payload = Payload}} ->
-            spawn_link(erlucia_controller, handle_payload, [Payload]),
-            loop()
+    amqp_channel:call(Channel, Sub),
+    
+    {noreply, #state{connection = Connection, channel = Channel}};
+handle_info(#'basic.consume_ok'{}, State) ->
+    {noreply, State};
+handle_info(#'basic.cancel_ok'{}, State) ->
+    {stop, normal, undefined};
+handle_info({#'basic.deliver'{delivery_tag = _Tag}, #amqp_msg{payload = Payload}}, State) ->
+    Pid = spawn(erlucia_controller, handle_payload, [Payload]),
+    monitor(process, Pid),
+    {noreply, State};
+handle_info({'DOWN', _Ref, process, _From, Reason}, State) ->
+    case Reason of
+        normal -> 
+            {noreply, State};
+        _ ->
+            lager:info("erlucia_controller exited unexpectedly ~p", [Reason]),
+            erlucia_fsm:stop(),
+            {noreply, State}
     end.
 
+terminate(_Reason, #state{connection = Connection, channel = Channel}) ->
+    lager:info("Disconnecting from message bus and terminating consumer"),
+    amqp_channel:close(Channel),
+    amqp_connection:close(Connection).
+
+%% Private
 queue_name(Name) ->
     {ok, Hostname} = inet:gethostname(),
-    list_to_binary(Name ++ "@" ++ Hostname).
+    list_to_binary([Name, <<"@">>, Hostname]).

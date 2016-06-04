@@ -8,7 +8,7 @@
 %% States
 -export([check_one/2, check_two/2, switch/2]).
 %% API
--export([next/0, reset/0, get/0]).
+-export([next/0, reset/0, get/0, stop/0]).
 
 start_link() ->
     lager:info("Starting FSM"),
@@ -59,3 +59,6 @@ reset() ->
 
 get() ->
     gen_fsm:sync_send_all_state_event(?MODULE, get).
+
+stop() ->
+    gen_fsm:stop(?MODULE).
