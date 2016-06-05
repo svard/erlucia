@@ -25,7 +25,7 @@ check_two(next, Data) ->
 
 switch(next, #{triggered := false}) ->
     Ids = erlucia_app:get_env(light_ids, []),
-    lists:foreach(fun(Id) -> erlucia_light:switch_on(Id) end, Ids),
+    spawn(erlucia_light, switch_on, [Ids]),
     {next_state, switch, #{triggered => true}};
 
 switch(next, Data) ->

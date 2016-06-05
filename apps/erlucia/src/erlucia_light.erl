@@ -2,10 +2,14 @@
 
 -export([switch_on/1, switch_off/1]).
 
+switch_on(Ids) when is_list(Ids) ->
+    lists:foreach(fun(Id) -> switch_on(Id) end, Ids);
 switch_on(Id) ->
     Body = jsx:encode(#{<<"state">> => <<"ON">>}),
     send(Id, Body).
 
+switch_off(Ids) when is_list(Ids) ->
+     lists:foreach(fun(Id) -> switch_off(Id) end, Ids);
 switch_off(Id) ->
     Body = jsx:encode(#{<<"state">> => <<"OFF">>}),
     send(Id, Body).
