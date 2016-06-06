@@ -51,14 +51,18 @@ code_change(_Old_version, State, Data, _Extra) ->
     {ok, State, Data}.
 
 %% API
+-spec next() -> 'ok'.
 next() ->
     gen_fsm:send_event(?MODULE, next).
 
+-spec reset() -> 'ok'.
 reset() ->
     gen_fsm:send_all_state_event(?MODULE, reset).
 
+-spec get() -> boolean().
 get() ->
     gen_fsm:sync_send_all_state_event(?MODULE, get).
 
+-spec stop() -> 'ok'.
 stop() ->
     gen_fsm:stop(?MODULE).

@@ -25,9 +25,11 @@ stop(_State) ->
 %% Internal functions
 %%====================================================================
 
+-spec get_env(atom()) -> term().
 get_env(Key) ->
     get_env(Key, undefined).
 
+-spec get_env(atom(), term()) -> term().
 get_env(Key, Default) ->
     case application:get_env(erlucia, Key) of
         {ok, Value} ->

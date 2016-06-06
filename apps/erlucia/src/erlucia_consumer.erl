@@ -69,6 +69,7 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% Private
+-spec queue_name(iolist()) -> binary().
 queue_name(Name) ->
     {ok, Hostname} = inet:gethostname(),
     list_to_binary([Name, <<"@">>, Hostname]).
