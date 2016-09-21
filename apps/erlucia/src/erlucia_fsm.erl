@@ -10,12 +10,14 @@
 %% API
 -export([next/0, reset/0, get/0, stop/0]).
 
+-record(state, {triggered}).
+
 start_link() ->
     lager:info("Starting FSM"),
     gen_fsm:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    {ok, check_one, #{triggered => false}}.
+    {ok, check_one, #state{triggered = false}}.
 
 check_one(next, Data) ->
     {next_state, check_two, Data}.
@@ -23,20 +25,19 @@ check_one(next, Data) ->
 check_two(next, Data) ->
     {next_state, switch, Data}.
 
-switch(next, #{triggered := false}) ->
+switch(next, #state{triggered = false}) ->
     Ids = erlucia_app:get_env(light_ids, []),
     spawn(erlucia_light, switch_on, [Ids]),
-    {next_state, switch, #{triggered => true}};
-
+    {next_state, switch, #state{triggered = true}};
 switch(next, Data) ->
     {next_state, switch, Data}.
 
 %% Callbacks
-handle_event(reset, _State_name, _Data) ->
-    {next_state, check_one, #{triggered => false}}.
+handle_event(reset, _State, _Data) ->
+    {next_state, check_one, #state{triggered = false}}.
 
-handle_sync_event(get, _From, State, Data) ->
-    {reply, maps:get(triggered, Data), State, Data}.
+handle_sync_event(get, _From, State, #state{triggered = Triggered} = Data) ->
+    {reply, Triggered, State, Data}.
 
 handle_info(_Info, State, Data) ->
     {next_state, State, Data}.
