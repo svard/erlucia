@@ -27,7 +27,7 @@ check_two(next, Data) ->
 
 switch(next, #state{triggered = false}) ->
     Ids = erlucia_app:get_env(light_ids, []),
-    spawn(erlucia_light, switch_on, [Ids]),
+    spawn_link(erlucia_light, switch_on, [Ids]),
     {next_state, switch, #state{triggered = true}};
 switch(next, Data) ->
     {next_state, switch, Data}.
