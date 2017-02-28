@@ -6,7 +6,7 @@
 %% Callbacks
 -export([init/1, handle_event/3, handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
 %% States
--export([check_one/2, check_two/2, switch/2]).
+-export([check_one/2, check_two/2, switch/2, idle/2]).
 %% API
 -export([next/0, reset/0, get/0, stop/0]).
 
@@ -28,9 +28,12 @@ check_two(next, Data) ->
 switch(next, #state{triggered = false}) ->
     Ids = erlucia_app:get_env(light_ids, []),
     spawn_link(erlucia_light, switch_on, [Ids]),
-    {next_state, switch, #state{triggered = true}};
+    {next_state, idle, #state{triggered = true}};
 switch(next, Data) ->
-    {next_state, switch, Data}.
+    {next_state, idle, Data}.
+
+idle(next, Data) ->
+    {next_state, idle, Data}.
 
 %% Callbacks
 handle_event(reset, _State, _Data) ->
